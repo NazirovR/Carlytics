@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация клиента</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen py-10 flex items-center justify-center font-sans">
+
+    <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-2xl">
+        <h1 class="text-2xl font-semibold text-center text-gray-800 mb-6">Регистрация клиента</h1>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Поля формы пользователя -->
+                {% for field in user_form.visible_fields %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-gray-700 font-medium mb-1">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <p class="text-sm text-red-600 mt-1">{{ field.errors|striptags }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <!-- Поля формы клиента -->
+                {% for field in client_form.visible_fields %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-gray-700 font-medium mb-1">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <p class="text-sm text-red-600 mt-1">{{ field.errors|striptags }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition">
+                Зарегистрироваться
+            </button>
+        </form>
+
+        <div class="text-center mt-6">
+            <a href="{% url 'login' %}" class="text-blue-600 hover:underline">
+                Уже есть аккаунт? Войти
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

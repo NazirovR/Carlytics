@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Статистика клиентов</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center mb-10">Статистика клиентов автосалона</h1>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-2xl shadow p-6 h-[400px]">
+            <canvas id="ageChart" class="w-full h-full"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl shadow p-6 h-[400px]">
+            <canvas id="genderChart" class="w-full h-full"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl shadow p-6 h-[400px]">
+            <canvas id="purposeChart" class="w-full h-full"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl shadow p-6 h-[400px]">
+            <canvas id="activityChart" class="w-full h-full"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl shadow p-6 h-[400px]">
+            <canvas id="repeatChart" class="w-full h-full"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl shadow p-6 h-[400px]">
+            <canvas id="durationChart" class="w-full h-full"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl shadow p-6 h-[400px]">
+            <canvas id="weekdayChart" class="w-full h-full"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl shadow p-6 h-[400px]">
+            <canvas id="hourChart" class="w-full h-full"></canvas>
+        </div>
+        <div class="bg-white rounded-2xl shadow p-6 h-[400px]">
+            <canvas id="crossChart" class="w-full h-full"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ageData = JSON.parse('{{ age_data|safe }}');
+    const genderData = JSON.parse('{{ gender_data|safe }}');
+    const purposeData = JSON.parse('{{ purpose_data|safe }}');
+    const activityData = JSON.parse('{{ activity_data|safe }}');
+    const repeatData = JSON.parse('{{ repeat_data|safe }}');
+    const durationData = JSON.parse('{{ duration_data|safe }}');
+    const weekdayData = JSON.parse('{{ weekday_data|safe }}');
+    const hourData = JSON.parse('{{ hour_data|safe }}');
+    const crossData = JSON.parse('{{ cross_data|safe }}');
+
+    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#8B5CF6', '#10B981'];
+
+    function renderChart(id, type, labels, datasets, titleText) {
+        new Chart(document.getElementById(id), {
+            type: type,
+            data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: titleText,
+                        font: { size: 18 }
+                    }
+                }
+            }
+        });
+    }
+
+    renderChart('ageChart', 'bar', Object.keys(ageData), [{
+        label: 'Возрастные группы',
+        data: Object.values(ageData),
+        backgroundColor: colors[0],
+        borderRadius: 6
+    }], 'Возрастная категория');
+
+    renderChart('genderChart', 'pie', Object.keys(genderData), [{
+        data: Object.values(genderData),
+        backgroundColor: [colors[0], colors[1]]
+    }], 'Распределение по полу');
+
+    renderChart('purposeChart', 'doughnut', Object.keys(purposeData), [{
+        data: Object.values(purposeData),
+        backgroundColor: colors.slice(0, Object.keys(purposeData).length)
+    }], 'Цели визита');
+
+    renderChart('activityChart', 'line', Object.keys(activityData), [{
+        label: 'Визиты по дням',
+        data: Object.values(activityData),
+        borderColor: colors[3],
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        fill: true,
+        tension: 0.3
+    }], 'Активность по дням');
+
+    renderChart('repeatChart', 'doughnut', Object.keys(repeatData), [{
+        data: Object.values(repeatData),
+        backgroundColor: [colors[0], colors[1]]
+    }], 'Повторные визиты');
+
+    renderChart('durationChart', 'bar', Object.keys(durationData), [{
+        label: 'Средняя длительность (часы)',
+        data: Object.values(durationData),
+        backgroundColor: colors[4],
+        borderRadius: 6
+    }], 'Средняя длительность визитов по целям');
+
+    renderChart('weekdayChart', 'bar', Object.keys(weekdayData), [{
+        label: 'Визиты по дням недели',
+        data: Object.values(weekdayData),
+        backgroundColor: colors[5],
+        borderRadius: 6
+    }], 'Распределение визитов по дням недели');
+
+    renderChart('hourChart', 'bar', Object.keys(hourData), [{
+        label: 'Час входа',
+        data: Object.values(hourData),
+        backgroundColor: colors[6],
+        borderRadius: 6
+    }], 'Распределение визитов по часам');
+
+    const crossLabels = Object.keys(crossData);
+    const purposes = [...new Set(Object.values(crossData).flatMap(group => Object.keys(group)))];
+    const crossDatasets = purposes.map((purpose, idx) => ({
+        label: purpose,
+        data: crossLabels.map(group => crossData[group][purpose] || 0),
+        backgroundColor: colors[idx % colors.length]
+    }));
+
+    renderChart('crossChart', 'bar', crossLabels, crossDatasets, 'Цель визита по полу и возрасту');
+</script>
+</body>
+</html>
